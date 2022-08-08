@@ -29,7 +29,7 @@ def process_song_data(spark, input_data, output_data):
     - output_data: output path
     """
     # get filepath to song data file
-    song_data = input_data + 'song-data/*/*/*'
+    song_data = input_data + 'song-data/*/*/*.json'
     
     # read song data file
     df = spark.read.json(song_data)
@@ -93,7 +93,7 @@ def process_log_data(spark, input_data, output_data):
     time_table.write.mode('overwrite').partitionBy('year', 'month').parquet(output_data + 'time_table')
 
     # read in song data to use for songplays table
-    song_data = input_data + 'song-data/*/*/*'
+    song_data = input_data + 'song-data/*/*/*.json'
     
     # read song data file
     song_df = spark.read.json(song_data)
