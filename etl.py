@@ -89,7 +89,7 @@ def process_log_data(spark, input_data, output_data):
                 .withColumn('month', F.month('start_time')) \
                 .withColumn('year', F.year('start_time')) \
                 .withColumn('weekday', F.dayofweek('start_time')) \
-                .distinct()
+                .drop_duplicates(subset=['start_time'])
     
     # write time table to parquet files partitioned by year and month
     time_table.write.mode('overwrite').partitionBy('year', 'month').parquet(output_data + 'time_table')
@@ -101,7 +101,10 @@ def process_log_data(spark, input_data, output_data):
     song_df = spark.read.json(song_data)
 
     # extract columns from joined song and log datasets to create songplays table 
-    stage_df = df.join(song_df, (df.song == song_df.title) & (df.artist == song_df.artist_name), 'inner')
+    stage_df = df.join(song_df, \
+        (df.song == song_df.title) & \
+        (df.artist == song_df.artist_name) & \
+        (df.length == song_df.duration), 'inner')
 
     songplays_table = \
     stage_df.distinct().select(
