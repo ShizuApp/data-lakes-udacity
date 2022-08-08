@@ -35,13 +35,15 @@ def process_song_data(spark, input_data, output_data):
     df = spark.read.json(song_data)
 
     # extract columns to create songs table
-    songs_table = df.select(['song_id', 'title', 'artist_id', 'year', 'duration']).distinct()
+    songs_table = df.select(['song_id', 'title', 'artist_id', 'year', 'duration'])
+    songs_table = songs_table.drop_duplicates(subset=['song_id'])
     
     # write songs table to parquet files partitioned by year and artist
     songs_table.write.mode('overwrite').partitionBy('year', 'artist_id').parquet(output_data + 'songs_table')
 
     # extract columns to create artists table
-    artists_table = df.select(["artist_id", "artist_name", "artist_location", "artist_latitude", "artist_longitude"]).distinct()
+    artists_table = df.select(["artist_id", "artist_name", "artist_location", "artist_latitude", "artist_longitude"])
+    artists_table = artists_table.drop_duplicates(subset=['artist_id'])
     
     # write artists table to parquet files
     artists_table.write.mode('overwrite').parquet(output_data + 'artists_table')
@@ -66,7 +68,7 @@ def process_log_data(spark, input_data, output_data):
     df = df.where('page="NextSong"')
 
     # extract columns for users table    
-    users_table = df.select(["userId", "firstName", "lastName", "gender", "level"]).distinct()
+    users_table = df.select(["userId", "firstName", "lastName", "gender", "level"]).drop_duplicates(subset=['userId'])
     
     # write users table to parquet files
     users_table.write.mode('overwrite').parquet(output_data + 'users_table')
